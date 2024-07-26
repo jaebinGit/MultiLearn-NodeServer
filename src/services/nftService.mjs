@@ -1,6 +1,7 @@
 import { ethers } from 'ethers';
 import esClient from '../config/elasticsearch.mjs';
 import { provider } from '../config/blockchain.mjs';
+import db from '../config/database.mjs';
 
 export const mintNFT = async (wallet, contract, metadataUri) => {
     const currentGasPrice = await provider.getGasPrice();
