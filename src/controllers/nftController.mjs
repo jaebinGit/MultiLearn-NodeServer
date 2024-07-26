@@ -1,5 +1,5 @@
 import { uploadMetadataToIPFS } from '../utils/ipfs.mjs';
-import { mintNFT, indexNFTData } from '../services/nftService.mjs';
+import {mintNFT, indexNFTData, getAnswerIdByQuestionId} from '../services/nftService.mjs';
 import { executeTransaction } from '../models/nftModel.mjs';
 import { contract, wallet } from '../config/blockchain.mjs';
 import axios from 'axios';
@@ -28,7 +28,12 @@ export const createNFT = async (req, res) => {
         const receipt = await txResponse.wait();
         const tokenId = parseInt(receipt.logs[0].topics[3]);
 
-        await executeTransaction(questionId, tokenId, metadataUri);
+        const answerId = await getAnswerIdByQuestionId(questionId);
+        if (!answerId) {
+            throw new Error(`Answer not found for question ID ${questionId}`);
+        }
+
+        await executeTransaction(answerId, tokenId, metadataUri);
         await indexNFTData(tokenId, {
             nationality,
             grade,

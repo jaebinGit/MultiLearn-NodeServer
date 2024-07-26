@@ -44,3 +44,18 @@ export const indexNFTData = async (tokenId, data) => {
         console.log('Error details:', error.message, error.meta?.body?.error);
     }
 };
+
+export const getAnswerIdByQuestionId = (questionId) => {
+    return new Promise((resolve, reject) => {
+        const query = 'SELECT id FROM answers WHERE questionId = ?';
+        db.query(query, [questionId], (error, results) => {
+            if (error) {
+                return reject(error);
+            }
+            if (results.length === 0) {
+                return resolve(null);
+            }
+            resolve(results[0].id);
+        });
+    });
+};
