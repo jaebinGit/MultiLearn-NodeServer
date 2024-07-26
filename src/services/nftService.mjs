@@ -48,7 +48,7 @@ export const indexNFTData = async (tokenId, data) => {
 
 export const getAnswerIdByQuestionId = (questionId) => {
     return new Promise((resolve, reject) => {
-        const query = 'SELECT id FROM answers WHERE questionId = ?';
+        const query = 'SELECT id FROM answers WHERE question_id = ?';
         db.query(query, [questionId], (error, results) => {
             if (error) {
                 return reject(error);
