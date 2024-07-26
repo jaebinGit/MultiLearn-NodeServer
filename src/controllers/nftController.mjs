@@ -61,7 +61,7 @@ export const getNFTDetails = async (req, res) => {
         const metadata = metadataResponse.data;
 
         // OpenSea API 호출
-        const openseaResponse = await axios.get(`https://api.opensea.io/api/v2/collection/questionnft-4/nfts`, {
+        const openseaResponse = await axios.get(`https://api.opensea.io/api/v2/collection/questionnft-5/nfts`, {
             headers: { 'X-API-KEY': OPENSEA_API_KEY },
             params: { asset_contract_address: CONTRACT_ADDRESS, token_ids: tokenId }
         });
@@ -89,7 +89,7 @@ export const getNFTDetails = async (req, res) => {
 export const listNFTs = async (req, res) => {
     try {
         // OpenSea API에서 NFT 목록 가져오기
-        const openseaResponse = await axios.get(`https://api.opensea.io/api/v2/collection/questionnft-4/nfts`, {
+        const openseaResponse = await axios.get(`https://api.opensea.io/api/v2/collection/questionnft-5/nfts`, {
             headers: { 'X-API-KEY': OPENSEA_API_KEY }
         });
 
