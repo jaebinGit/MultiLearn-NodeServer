@@ -4,6 +4,6 @@ import { searchNFTs, getPopularNFTs } from '../controllers/searchController.mjs'
 const router = express.Router();
 
 router.get('/search', searchNFTs);
-router.get('/popular-nfts', getPopularNFTs);
+router.get('/top3-nft', getPopularNFTs);
 
 export default router;
