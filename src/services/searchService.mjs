@@ -16,41 +16,53 @@ export const performSearch = async (index, query) => {
     }
 };
 
-// 인기 NFT 조회
 export const fetchPopularNFTs = async () => {
     try {
-        const { body } = await esClient.search({
-            index: 'nfts',
+        const { body: keywordBody } = await esClient.search({
+            index: 'search_keywords',
             size: 0,
             body: {
                 aggs: {
                     top_keywords: {
                         terms: {
-                            field: 'search_keywords.keyword',
+                            field: 'keyword',
                             size: 3
-                        },
-                        aggs: {
-                            top_nfts: {
-                                top_hits: {
-                                    size: 1,
-                                    _source: {
-                                        includes: ['tokenId', 'questionContent', 'image', 'nationality', 'grade']
-                                    }
-                                }
-                            }
                         }
                     }
                 }
             }
         });
-        return body.aggregations.top_keywords.buckets.map(bucket => {
-            const nftDetails = bucket.top_nfts.hits.hits[0]._source;
-            return {
-                keyword: bucket.key,
-                count: bucket.doc_count,
-                nftDetails
-            };
+
+        const topKeywords = keywordBody.aggregations.top_keywords.buckets.map(bucket => bucket.key);
+
+        const nftPromises = topKeywords.map(async (keyword) => {
+            const { body: nftBody } = await esClient.search({
+                index: 'nfts',
+                size: 1,
+                body: {
+                    query: {
+                        match: {
+                            search_keywords: keyword
+                        }
+                    },
+                    _source: ['tokenId', 'questionContent', 'image', 'nationality', 'grade']
+                }
+            });
+
+            if (nftBody.hits.hits.length > 0) {
+                const nftDetails = nftBody.hits.hits[0]._source;
+                return {
+                    keyword,
+                    count: keywordBody.aggregations.top_keywords.buckets.find(bucket => bucket.key === keyword).doc_count,
+                    nftDetails
+                };
+            }
+
+            return null;
         });
+
+        const popularNFTs = await Promise.all(nftPromises);
+        return popularNFTs.filter(nft => nft !== null);
     } catch (error) {
         console.error('Error fetching popular NFTs:', error);
         throw error;
