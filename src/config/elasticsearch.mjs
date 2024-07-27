@@ -98,6 +98,78 @@ async function setupElasticsearch() {
                 }
             }
         });
+
+        await esClient.indices.create({
+            index: 'search_keywords',
+            body: {
+                settings: {
+                    number_of_shards: 1,
+                    number_of_replicas: 0,
+                    analysis: {
+                        tokenizer: {
+                            kuromoji_tokenizer: {
+                                type: 'kuromoji_tokenizer'
+                            },
+                            nori_tokenizer: {
+                                type: 'nori_tokenizer'
+                            },
+                            smartcn_tokenizer: {
+                                type: 'smartcn_tokenizer'
+                            }
+                        },
+                        analyzer: {
+                            multilingual_analyzer: {
+                                type: 'custom',
+                                tokenizer: 'standard',
+                                filter: [
+                                    'lowercase',
+                                    'kuromoji_baseform',
+                                    'kuromoji_part_of_speech',
+                                    'nori_readingform',
+                                    'nori_part_of_speech',
+                                    'english_stop',
+                                    'cjk_width'
+                                ]
+                            },
+                            japanese_analyzer: {
+                                type: 'custom',
+                                tokenizer: 'kuromoji_tokenizer',
+                                filter: [
+                                    'kuromoji_baseform',
+                                    'kuromoji_part_of_speech',
+                                    'cjk_width',
+                                    'lowercase',
+                                    'kuromoji_stemmer'
+                                ]
+                            },
+                            korean_analyzer: {
+                                type: 'custom',
+                                tokenizer: 'nori_tokenizer',
+                                filter: [
+                                    'nori_readingform',
+                                    'nori_part_of_speech',
+                                    'lowercase'
+                                ]
+                            },
+                            chinese_analyzer: {
+                                type: 'custom',
+                                tokenizer: 'smartcn_tokenizer',
+                                filter: [
+                                    'lowercase'
+                                ]
+                            }
+                        }
+                    }
+                },
+                mappings: {
+                    properties: {
+                        keyword: { type: 'text', analyzer: 'multilingual_analyzer' },
+                        timestamp: { type: 'date' }
+                    }
+                }
+            }
+        });
+
         console.log('Elasticsearch index created');
     } catch (error) {
         if (error.meta && error.meta.body && error.meta.body.error && error.meta.body.error.type !== 'resource_already_exists_exception') {
