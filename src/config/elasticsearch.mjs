@@ -163,7 +163,7 @@ async function setupElasticsearch() {
                 },
                 mappings: {
                     properties: {
-                        keyword: { type: 'text', analyzer: 'multilingual_analyzer' },
+                        keyword: { type: 'keyword', analyzer: 'multilingual_analyzer' },
                         timestamp: { type: 'date' }
                     }
                 }
