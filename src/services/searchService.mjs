@@ -41,8 +41,9 @@ export const fetchPopularNFTs = async () => {
                 size: 1,
                 body: {
                     query: {
-                        match: {
-                            search_keywords: keyword
+                        multi_match: {
+                            query: keyword,
+                            fields: ['questionContent', 'answerContent']
                         }
                     },
                     _source: ['tokenId', 'questionContent', 'image', 'nationality', 'grade']
