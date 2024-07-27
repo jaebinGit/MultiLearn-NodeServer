@@ -106,6 +106,12 @@ async function setupElasticsearch() {
                     number_of_shards: 1,
                     number_of_replicas: 0,
                     analysis: {
+                        filter: {
+                            english_stop: {
+                                type: "stop",
+                                stopwords: "_english_"
+                            }
+                        },
                         tokenizer: {
                             kuromoji_tokenizer: {
                                 type: 'kuromoji_tokenizer'
@@ -163,7 +169,7 @@ async function setupElasticsearch() {
                 },
                 mappings: {
                     properties: {
-                        keyword: { type: 'keyword', analyzer: 'multilingual_analyzer' },
+                        keyword: { type: 'text', analyzer: 'multilingual_analyzer', fielddata: true },
                         timestamp: { type: 'date' }
                     }
                 }
