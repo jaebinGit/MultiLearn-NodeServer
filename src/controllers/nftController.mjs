@@ -10,12 +10,12 @@ dotenv.config();
 const { OPENSEA_API_KEY, CONTRACT_ADDRESS } = process.env;
 
 export const createNFT = async (req, res) => {
-    const { questionContent, answerContent, nationality, grade } = req.body;
+    const { questionContent, answerContent, nationality, grade, imageUrl } = req.body;
     const questionId = parseInt(req.params.questionId);
     const metadata = {
         name: questionContent,
         description: answerContent,
-        image: "",
+        image: imageUrl,
         attributes: [
             { trait_type: "Nationality", value: nationality },
             { trait_type: "Grade", value: grade.toString() }
