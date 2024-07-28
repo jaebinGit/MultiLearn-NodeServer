@@ -10,12 +10,12 @@ dotenv.config();
 const { OPENSEA_API_KEY, CONTRACT_ADDRESS } = process.env;
 
 export const createNFT = async (req, res) => {
-    const { questionContent, answerContent, nationality, grade, imageUrl } = req.body;
+    const { questionContent, answerContent, nationality, grade } = req.body;
     const questionId = parseInt(req.params.questionId);
     const metadata = {
         name: questionContent,
         description: answerContent,
-        image: imageUrl,
+        image: "",
         attributes: [
             { trait_type: "Nationality", value: nationality },
             { trait_type: "Grade", value: grade.toString() }
@@ -27,6 +27,16 @@ export const createNFT = async (req, res) => {
         const txResponse = await mintNFT(wallet, contract, metadataUri);
         const receipt = await txResponse.wait();
         const tokenId = parseInt(receipt.logs[0].topics[3]);
+
+        const openseaResponse = await axios.get(`https://api.opensea.io/api/v2/collection/questionnft-3/nfts`, {
+            headers: { 'X-API-KEY': OPENSEA_API_KEY },
+            params: { asset_contract_address: CONTRACT_ADDRESS, token_ids: tokenId }
+        });
+
+        const nftData = openseaResponse.data.nfts.find(nft => nft.identifier === tokenId.toString());
+        const imageUrl = nftData ? nftData.display_image_url : metadata.image;
+
+        metadata.image = imageUrl;
 
         const answerId = await getAnswerIdByQuestionId(questionId);
         if (!answerId) {
