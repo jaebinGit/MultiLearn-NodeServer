@@ -22,11 +22,20 @@ export const mintNFT = async (wallet, contract, metadataUri) => {
     try {
         const signedTx = await wallet.signTransaction(tx);
         const txResponse = await provider.sendTransaction(signedTx);
-        const receipt = await txResponse.wait();
 
-        // 토큰 존재 확인
+        let receipt;
+        try {
+            receipt = await txResponse.wait();
+        } catch (error) {
+            if (error.code === 'TRANSACTION_REPLACED') {
+                receipt = await provider.waitForTransaction(error.replacement.hash);
+            } else {
+                throw error;
+            }
+        }
+
         const tokenId = parseInt(receipt.logs[0].topics[3]);
-        const tokenURI = await contract.tokenURI(tokenId); // 성공적으로 발행되었는지 확인
+        const tokenURI = await contract.tokenURI(tokenId);
         return { txResponse, tokenId, tokenURI };
     } catch (error) {
         console.error('Transaction failed with error:', error);
