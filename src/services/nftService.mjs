@@ -13,7 +13,7 @@ export const mintNFT = async (wallet, contract, metadataUri) => {
     const tx = {
         nonce,
         gasPrice: increasedGasPrice,
-        gasLimit: estimatedGas.mul(ethers.BigNumber.from(2)),
+        gasLimit: estimatedGas.add(ethers.BigNumber.from(100000)),
         to: contract.address,
         data: contract.interface.encodeFunctionData('mintNFT', [wallet.address, metadataUri]),
         chainId: 137 // 폴리곤 메인넷 체인 ID
