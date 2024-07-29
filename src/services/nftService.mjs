@@ -7,7 +7,7 @@ export const mintNFT = async (wallet, contract, metadataUri) => {
     const currentGasPrice = await provider.getGasPrice();
     const increasedGasPrice = currentGasPrice.mul(110).div(100);
 
-    const nonce = await provider.getTransactionCount(wallet.address, 'latest');
+    let nonce = await provider.getTransactionCount(wallet.address, 'latest');
     const estimatedGas = await contract.estimateGas.mintNFT(wallet.address, metadataUri);
 
     const tx = {
@@ -22,8 +22,12 @@ export const mintNFT = async (wallet, contract, metadataUri) => {
     try {
         const signedTx = await wallet.signTransaction(tx);
         const txResponse = await provider.sendTransaction(signedTx);
-        await txResponse.wait();
-        return txResponse;
+        const receipt = await txResponse.wait();
+
+        // 토큰 존재 확인
+        const tokenId = parseInt(receipt.logs[0].topics[3]);
+        const tokenURI = await contract.tokenURI(tokenId); // 성공적으로 발행되었는지 확인
+        return { txResponse, tokenId, tokenURI };
     } catch (error) {
         console.error('Transaction failed with error:', error);
         throw error;
